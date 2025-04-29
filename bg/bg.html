@@ -13,9 +13,11 @@
             width: 100vw;
             overflow: hidden;
             transition: background-color 0.3s;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
-        #colorPicker {
+        #controls {
             position: fixed;
             top: 20px;
             left: 45px;
@@ -26,9 +28,13 @@
             transition: opacity 0.3s, visibility 0.3s;
         }
 
-        #colorPicker.hidden {
+        #controls.hidden {
             opacity: 0;
             visibility: hidden;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
         }
 
         label {
@@ -41,6 +47,14 @@
             width: 100px;
             height: 40px;
             cursor: pointer;
+        }
+
+        select {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
         }
 
         #toggleButton {
@@ -75,27 +89,98 @@
         #toggleButton:hover {
             background: rgba(255, 255, 255, 0.5);
         }
+
+        .control-group input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            padding: 8px 12px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .upload-btn:hover {
+            background: #45a049;
+        }
     </style>
 </head>
 <body>
     <button id="toggleButton"></button>
-    <div id="colorPicker" class="hidden">
-        <label for="bgColor">Selecciona un color:</label>
-        <input type="color" id="bgColor" value="#ffffff">
+    <div id="controls" class="hidden">
+        <div class="control-group">
+            <label for="bgColor">Color de fondo:</label>
+            <input type="color" id="bgColor" value="#ffffff">
+        </div>
+        
+        <div class="control-group">
+            <label for="bgImage">Imagen de fondo:</label>
+            <label class="upload-btn" for="bgImage">
+                Subir imagen
+            </label>
+            <input type="file" id="bgImage" accept="image/*">
+            
+            <label for="imageSize">Ajuste de imagen:</label>
+            <select id="imageSize">
+                <option value="cover">Cubrir pantalla (recorta los bordes)</option>
+                <option value="contain">Ajustar completa (mantiene proporción)</option>
+                <option value="100% 100%">Estirar a pantalla completa</option>
+                <option value="auto">Tamaño original</option>
+            </select>
+        </div>
     </div>
 
     <script>
         const colorInput = document.getElementById('bgColor');
-        const colorPicker = document.getElementById('colorPicker');
+        const controls = document.getElementById('controls');
         const toggleButton = document.getElementById('toggleButton');
+        const imageInput = document.getElementById('bgImage');
+        const imageSizeSelect = document.getElementById('imageSize');
+
+        let currentImageUrl = '';
 
         colorInput.addEventListener('input', (e) => {
+            document.body.style.backgroundImage = 'none';
             document.body.style.backgroundColor = e.target.value;
         });
 
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageUrl = e.target.result;
+                    updateBackgroundImage();
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        imageSizeSelect.addEventListener('change', updateBackgroundImage);
+
+        function updateBackgroundImage() {
+            if (currentImageUrl) {
+                document.body.style.backgroundSize = imageSizeSelect.value;
+                document.body.style.backgroundImage = `url(${currentImageUrl})`;
+            }
+        }
+
         toggleButton.addEventListener('click', () => {
-            colorPicker.classList.toggle('hidden');
+            controls.classList.toggle('hidden');
             toggleButton.classList.toggle('active');
+        });
+
+        // Evento para cambiar la clase del dispositivo
+        deviceRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                devicePreview.className = `device-preview ${e.target.value}`;
+            });
         });
     </script>
 </body>
